@@ -1,0 +1,7 @@
+from sklearn.feature_extraction.text import TfidfVectorizer
+def char_gram(text):
+  return [c for c in text]
+vectorizer = TfidfVectorizer(tokenizer = char_gram, ngram_range=(2,2), max_df = 0.06, min_df = 0.0006)
+vectorizer = vectorizer.fit(sentences_train)
+X_train = vectorizer.transform(sentences_train)
+X_test  = vectorizer.transform(sentences_test)
