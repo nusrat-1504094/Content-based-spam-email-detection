@@ -1,0 +1,72 @@
+from __future__ import print_function,division
+import nltk
+import csv
+import os
+import random
+from collections import Counter
+nltk.download('wordnet')
+nltk.download('stopwords')
+nltk.download('punkt')
+from nltk import word_tokenize,WordNetLemmatizer
+from nltk.corpus import stopwords
+from nltk.util import ngrams
+from nltk.util import bigrams
+
+from collections import defaultdict  # For word frequency
+
+import spacy  # For preprocessing
+
+import pickle
+import string
+import re
+import pandas as pd
+import numpy as np 
+import matplotlib.pyplot as plt
+df_data = pd.read_csv('emails.csv')
+df_data.head()
+
+from sklearn.model_selection import train_test_split
+sentences = df_data['text'].values
+target = df_data['spam'].values
+sentences_train, sentences_test, y_train, y_test = train_test_split(
+   sentences, target, test_size=0.20, random_state=1000)
+
+sentences_test
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+def tokenizer(text):
+  return text.split()
+vectorizer = TfidfVectorizer(tokenizer = tokenizer, ngram_range=(2,2), max_df = 0.06, min_df = 0.0006)
+vectorizer = vectorizer.fit(sentences_train)
+X_train = vectorizer.transform(sentences_train)
+X_test  = vectorizer.transform(sentences_test)
+
+
+def get_scores(y_test, y_pred):
+  from sklearn.metrics import accuracy_score,f1_score, precision_score, recall_score
+  # accuracy: (tp + tn) / (p + n)
+  accuracy = accuracy_score(y_test, y_pred)
+
+  # f1: 2 tp / (2 tp + fp + fn)
+  f1 = f1_score(y_test, y_pred)
+
+  # precision:  tp / (tp + fp)
+  precision = precision_score(y_test, y_pred)
+
+  # recall:  tp / (tp + fn)
+  recall = recall_score(y_test, y_pred)
+
+  return {
+      'accuracy':accuracy,
+      'f1':f1, 
+      'precision':precision, 
+      'recall':recall
+  }
+
+
+from sklearn.naive_bayes import MultinomialNB
+classifier = MultinomialNB()
+classifier.fit(X_train, y_train)
+y_pred = classifier.predict(X_test)
+get_scores(y_test,y_pred)
